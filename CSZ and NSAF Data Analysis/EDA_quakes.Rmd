@@ -1,0 +1,218 @@
+---
+title: "HON 498 Data"
+author: "Swetha Natarajan"
+date: "1/31/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#reading in the data: query csv
+
+details: This data is for all seismic activity in the approximate area of the CSZ (coordinates written) for all of 2021. 
+
+```{r}
+
+getwd()
+
+setwd("C:/Users/sweth/Desktop/HON498 Materials")
+
+eq <- read.csv(file = "C:/Users/sweth/Desktop/HON498 Materials/query.csv")
+
+# subsetting the data; keeping only the variables needed
+eq <- subset(eq, select = c("time", "latitude", "longitude", "depth", "mag", "magType", "nst", "gap", "dmin", "rms", "net", "place", "type",  "magNst"))
+
+```
+
+
+attempting to create a time series visual with the dates we have 
+```{r}
+# first, checking if our time is read in as a date
+str(eq$time)
+
+eq$time <-as.POSIXct(eq$time,"%Y-%m-%d %H:%M:%S")
+str(eq$time)
+
+# Time series of mag x time  
+
+library(ggplot2)
+p <- ggplot(eq, aes(time, mag)) + geom_line() + ggtitle("Distribution of Changes in Magnitude over Time for 2021", subtitle = "Figure 1")
+p
+
+library(tidyr)
+library(dplyr)
+library(ggalt)
+#install.packages("ggalt")
+
+
+```
+Scatter plots: 
+```{r}
+library(car)
+# grid scatterplot of all variables against each other 
+pairs(~mag + nst + depth + gap, data = eq)
+
+#earthquakes in locations that exceed 180 degrees typically have large location and depth uncertainties
+gap <- eq$gap
+depth <- eq$depth
+mag <- eq$mag
+scatterplot(gap, depth, data = eq)
+# mag vs depth 
+scatterplot(depth, mag, data = eq)
+# 3d scatterplot with variables depth, mag, nst 
+#install.packages("scatterplot3d")
+library(scatterplot3d)
+attach(eq)
+scatterplot3d(mag, depth, nst, type =  'h')
+```
+
+
+bar chart of magnitude distribution
+```{r}
+hist1 <- ggplot(eq, aes(x = mag)) + geom_histogram(aes(y=..density..), colour = "black", fill = "white") + geom_density(alpha = .2, fill = "#FF6666")
+hist1
+
+hist2 <-ggplot(eq, aes(x = depth)) + geom_histogram(aes(y=..density..), colour = "black", fill = "white") + geom_density(alpha = .2, fill = "#FF6666") + 
+  labs(x= "Depth", y = "")
+hist2
+```
+
+
+```{r}
+barplot1 <- ggplot(eq, aes(x= depth, y = mag, color = depth)) + geom_bar(stat = "identity")
+barplot1
+
+```
+
+```{r}
+##State Shapefile
+library(sp)
+library(raster)
+  st <- tigris::states()
+  #Reduce the data to only California
+  Cali <- st[st$STUSPS == "CA",]
+  #Transform to Spatial
+  Cali <- as(Cali, 'Spatial')
+  #Reproject from LONGLAT to UTM
+ # Cali <- spTransform(Cali, CRS(utm))
+# Washington
+  WA <- st[st$STUSPS == "WA",]
+  #Transform to Spatial
+  WA <- as(WA, 'Spatial')
+  #Reproject from LONGLAT to UTM
+#  WA <- spTransform(WA, CRS(utm))
+# Oregon 
+  OR <- st[st$STUSPS == "OR",]
+  #Transform to Spatial
+  OR <- as(OR, 'Spatial')
+  #Reproject from LONGLAT to UTM
+#  OR <- spTransform(OR, CRS(utm))
+
+eq_map <- rbind(Cali, OR, WA)
+plot(eq_map) 
+points(eq$longitude, eq$latitude)
+x <- -10:10
+y <- -10:10
+z <- sqrt(outer(x ^ 2, y ^ 2, "+"))
+
+```
+
+
+## looking at data from other years: 
+
+```{r}
+getwd()
+setwd("C:/Users/sweth/Desktop/HON498 Materials")
+library(grid)
+library(gridExtra)
+
+# 2020
+eq2020 <- read.csv(file = "C:/Users/sweth/Desktop/HON498 Materials/query (1).csv")
+
+# subsetting the data; keeping only the variables needed
+eq2020 <- subset(eq2020, select = c("time", "latitude", "longitude", "depth", "mag", "magType", "nst", "gap", "dmin", "rms", "net", "place", "type",  "magNst"))
+
+# plotting time series 
+str(eq2020$time)
+
+eq2020$time <-as.POSIXct(eq2020$time,"%Y-%m-%d %H:%M:%S")
+str(eq2020$time)
+
+# Time series of mag x time  
+library(ggplot2)
+p1 <- ggplot(eq2020, aes(time, mag)) + geom_line() 
+p1
+
+## 2019
+eq2019 <- read.csv(file = "C:/Users/sweth/Desktop/HON498 Materials/query (3).csv")
+
+# subsetting the data; keeping only the variables needed
+eq2019 <- subset(eq2019, select = c("time", "latitude", "longitude", "depth", "mag", "magType", "nst", "gap", "dmin", "rms", "net", "place", "type",  "magNst"))
+
+# plotting time series 
+str(eq2019$time)
+
+eq2019$time <-as.POSIXct(eq2019$time,"%Y-%m-%d %H:%M:%S")
+str(eq2019$time)
+
+# Time series of mag x time  
+library(ggplot2)
+p2 <- ggplot(eq2019, aes(time, mag)) + geom_line() 
+p2
+
+## 2018 
+
+eq2018 <- read.csv(file = "C:/Users/sweth/Desktop/HON498 Materials/query (4).csv")
+
+# subsetting the data; keeping only the variables needed
+eq2018 <- subset(eq2018, select = c("time", "latitude", "longitude", "depth", "mag", "magType", "nst", "gap", "dmin", "rms", "net", "place", "type",  "magNst"))
+
+# plotting time series 
+str(eq2018$time)
+
+eq2018$time <-as.POSIXct(eq2018$time,"%Y-%m-%d %H:%M:%S")
+str(eq2018$time)
+
+# Time series of mag x time  
+library(ggplot2)
+p3 <- ggplot(eq2018, aes(time, mag)) + geom_line() 
+p3
+
+## 2017
+eq2017 <- read.csv(file = "C:/Users/sweth/Desktop/HON498 Materials/query (5).csv")
+
+# subsetting the data; keeping only the variables needed
+eq2017 <- subset(eq2017, select = c("time", "latitude", "longitude", "depth", "mag", "magType", "nst", "gap", "dmin", "rms", "net", "place", "type",  "magNst"))
+
+# plotting time series 
+str(eq2017$time)
+
+eq2017$time <-as.POSIXct(eq2017$time,"%Y-%m-%d %H:%M:%S")
+str(eq2017$time)
+
+# Time series of mag x time  
+library(ggplot2)
+p4 <- ggplot(eq2017, aes(time, mag)) + geom_line() 
+p4
+
+grid.arrange(p1, p2, p3, p4)
+```
+
+```{r}
+eq_map <- rbind(Cali, OR, WA)
+plot(eq_map) 
+points(eq2020$longitude, eq2020$latitude)
+x <- -10:10
+y <- -10:10
+z <- sqrt(outer(x ^ 2, y ^ 2, "+"))
+```
+
+```{r}
+eq2020$mag
+
+
+```
+
+
