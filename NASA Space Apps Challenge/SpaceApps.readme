@@ -1,0 +1,9 @@
+## this folder contains code for the 2022 NASA Space Apps Challenge. the purpose of this challenge was to
+## create a platform to help the user learn more about stellar variabililty. 
+## my teams goal was to create a webpage where the user could change metrics related to stellar variabillty that
+## would then change an animated simulation of an exoplanet and star, and an animated line graph. 
+## my part consisted of data filtration and exportation and creating the animated exoplanet. R was used for data work 
+## and python for the animation. 
+
+## data set can be obtained here: http://cdn.gea.esac.esa.int/Gaia/gedr3/simulation/gaia_universe_model/
+## documentation: https://gea.esac.esa.int/archive/documentation/GDR3/Gaia_archive/chap_datamodel/sec_dm_simulation_tables/ssec_dm_gaia_universe_model.html
